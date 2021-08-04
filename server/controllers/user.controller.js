@@ -33,12 +33,18 @@ module.exports = {
       .then((user) => res.json({ message: 'success', results: user }))
       .catch((error) => res.json({ message: 'error', results: error }));
   },
-  register: (req, res) => {
+  register: async (req, res) => {
     const email = req.body.email;
-    // const duplicateUser = User.findOne({ email: email });
-    // if (duplicateUser) {
-    //   res.status(400).json({ message: 'duplicate user error' });
-    // }
+    const username = req.body.username;
+    const duplicateEmail = await User.findOne({ email: email });
+    if (duplicateEmail) {
+      return res.status(400).json({ message: 'Email already exists!' });
+    }
+    const duplicateUsername = await User.findOne({ username: username });
+    if (duplicateUsername) {
+      return res.status(400).json({ message: 'Username already exists!' });
+    }
+
     const uniqueString = randomString();
     const newUser = {
       ...req.body,
@@ -49,8 +55,8 @@ module.exports = {
       .then((user) => {
         let userObj = {
           _id: user._id,
-          // email: user.email,
-          // uniqueString: uniqueString,
+          email: user.email,
+          uniqueString: uniqueString,
           status: user.status,
         };
         sendEmailVerificationLink(email, uniqueString);

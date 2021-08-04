@@ -9,8 +9,6 @@ const ONE_WEEK = 1000 * 60 * 60 * 24 * 7;
 require('dotenv').config();
 require('./server/config/mongoose.config');
 
-const IN_PROD = process.env.NODE_ENV === 'production';
-
 app.use(
   session({
     name: process.env.SESS_NAME,

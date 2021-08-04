@@ -1,6 +1,4 @@
 const { User } = require('../models/user.model');
-const { Code } = require('../models/code.model');
-const { randomString } = require('../middleware/randomString.middleware');
 const {
   sendApprovalLink,
   sendApprovalConfirmationLink,
@@ -11,14 +9,6 @@ module.exports = {
     const reqId = req.params.id;
     const requestUser = await User.findOne({ _id: reqId });
     const user = await User.findOne({ _id: req.session.userId });
-
-    console.log(typeof requestUser._id);
-    console.log(requestUser._id);
-    console.log(typeof user._id);
-    console.log(user._id);
-    console.log(typeof reqId);
-    console.log(typeof req.session.userId);
-    console.log(reqId === req.session.userId);
 
     if (!requestUser || !user || reqId !== req.session.userId) {
       return res.status(400);
@@ -35,25 +25,16 @@ module.exports = {
   verifyUserEmail: async (req, res) => {
     const updateObj = { emailIsVerified: true, status: 'verified' };
     const { uniqueString } = req.params;
-    const code = await randomString();
-    const codeBody = { generatedCode: code };
-    await Code.create(codeBody);
     await User.findOneAndUpdate({ uniqueString: uniqueString }, updateObj, {
       runValidators: true,
       new: true,
       useFindAndModify: false,
     })
       .then((user) => {
-        sendApprovalLink(
-          user.username,
-          user.email,
-          user.message,
-          uniqueString,
-          code
-        );
+        sendApprovalLink(user.username, user.email, user.message);
         let userObj = {
           _id: user._id,
-          // email: user.email,
+          email: user.email,
           // uniqueString: uniqueString,
           status: user.status,
         };
